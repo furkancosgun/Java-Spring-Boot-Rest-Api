@@ -248,7 +248,7 @@ GET: localhost:8080/api/users/1
 
 POST: localhost:8080/api/users
 ```json
-//REQUEST                            
+//REQUEST
 {                                
 "fullName":"Admin Admin",        
 "email":"admin@admin.com",        
@@ -263,7 +263,7 @@ POST: localhost:8080/api/users
 ```
 PUT: localhost:8080/api/users/1
 ```json
-//REQUEST            
+//REQUEST
 {                                
 "fullName": "cosgun furkan",    
 "email": "qwea@gmail.com",         
