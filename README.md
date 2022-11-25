@@ -1,9 +1,13 @@
 # Java Spring Boot Rest API
 
 1 - [Spring Boot Projemiz Için Temel Dosyalar](https://start.spring.io/#!type=maven-project&language=java&platformVersion=3.0.1-SNAPSHOT&packaging=jar&jvmVersion=17&groupId=com.furkancosgun&artifactId=users&name=users&description=Demo%20project%20for%20Spring%20Boot&packageName=com.furkancosgun.users&dependencies=native,devtools,lombok,configuration-processor,web,security,data-jpa,mysql)
+<br>
 2 - [Elimizde MySQLWorkbench kurulu oldugunu varsayıyorum](https://dev.mysql.com/downloads/workbench/) 
+<br>
 3 - [Ayrıca MySQL inde kurulu olması gerekli](https://www.mysql.com/downloads/)
+<br>
 4 - MySQL Workbench yardımıyla scheme oluşturup kullanıcı adı ve şifre bilgilerini unutmuyoruz
+<br>
 
 5 - Spring Projemize donelim
 -    
@@ -244,21 +248,33 @@ GET: localhost:8080/api/users/1
 
 POST: localhost:8080/api/users
 ```json
-//REQUEST                         |    RESPONSE
-{                                |{
-"fullName":"Admin Admin",        |"id" : 2,
-"email":"admin@admin.com",        |"fullName" : "Admin Admin",
-"password":"admin"                |"email" : "admin@admin.com"
-}                                |}
+//REQUEST                            
+{                                
+"fullName":"Admin Admin",        
+"email":"admin@admin.com",        
+"password":"admin"                
+}
+// RESPONSE
+{
+"id" : 2,
+"fullName" : "Admin Admin",
+"email" : "admin@admin.com"
+}
 ```
 PUT: localhost:8080/api/users/1
 ```json
-//REQUEST                        |//RESPONSE
-{                                |{
-"fullName": "cosgun furkan",    |"id" : 1,
-"email": "qwea@gmail.com",         |"email" : "qwe@gmail.com",
-"password":"0123456789"            |"password" : "0123456789"
-}                                |
+//REQUEST            
+{                                
+"fullName": "cosgun furkan",    
+"email": "qwea@gmail.com",         
+"password":"0123456789"            
+}                
+//RESPONSE
+{
+"id" : 1,
+"email" : "qwe@gmail.com",
+"password" : "0123456789"
+}
 ```
 DELETE: localhost:8080/api/users/1
 ```json
