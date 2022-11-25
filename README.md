@@ -7,19 +7,18 @@
 3 - [Ayrıca MySQL inde kurulu olması gerekli](https://www.mysql.com/downloads/)
 <br>
 4 - MySQL Workbench yardımıyla scheme oluşturup kullanıcı adı ve şifre bilgilerini unutmuyoruz
-<br>
 
 5 - Spring Projemize donelim
--    
- -    VeriTabanı Bağlantısı ve Port Seçimi
-    -main/resources/application.properties
+-	
+ -	VeriTabanı Bağlantısı ve Port Seçimi
+	-main/resources/application.properties
 ```properties
-spring.datasource.url=jdbc:mysql://127.0.0.1:3306/UsersSchm
-spring.datasource.username=root
-spring.datasource.password=5747Fc..
-spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-spring.jpa.hibernate.ddl-auto=update
-server.port=8080
+spring.datasource.url=jdbc:mysql://127.0.0.1:3306/UsersSchme #UsersSchme Şema adımız oluyor
+spring.datasource.username=root #MySQL kullanıcı adı
+spring.datasource.password=123456  #Şifresi
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver. #sabit
+spring.jpa.hibernate.ddl-auto=update   #Okuma ve Yazma tam izin sabit
+server.port=8080 #Api için port 
 ```
 - Entityleri Oluşturmak 
 
@@ -33,15 +32,15 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.util.Date;  
   
   
-@Entity  
-@Table(name = "users")  
-@Data  
-@NoArgsConstructor  
+@Entity  //Bu classın db de maplenecegini soyleriz
+@Table(name = "users")  //db tablo adı
+@Data   //her property için getter ve setter
+@NoArgsConstructor   //argumansız constructor
 public class User {  
 
-    @Id  
- @GeneratedValue(strategy = GenerationType.IDENTITY)  
-    @Column(name = "id")  
+    @Id  //id olcak
+    @GeneratedValue(strategy = GenerationType.IDENTITY) //otomatik artan sayı 
+    @Column(name = "id")  //kolon adı
     private long id;  
     
     @Column(name = "full_name")  
@@ -54,9 +53,11 @@ public class User {
     private String password;  
   
     @Column(name = "system_auto_date")  
-    @Temporal(TemporalType.TIMESTAMP)  
-    @CreationTimestamp  
-  private Date date;  
+    @Temporal(TemporalType.TIMESTAMP)  //sisteme kayıt edildigi saat ve tarih
+    @CreationTimestamp
+    private Date date;  
+    
+    //Constructor
     public User(String fullName,  String email,String password) {  
         this.email = email;  
         this.fullName = fullName;  
@@ -64,13 +65,21 @@ public class User {
     }   
 }
 ```
--    Entity katmanlarının repostiorylerini hazırlayalım
+-	Entity katmanlarının repostiorylerini hazırlayalım
 ```java
 package com.furkancosgun.users.Repostiory;
 
 import com.furkancosgun.users.Entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+/*
+Jpa Tarafından bize sql tarafı için birçok hazır yapı gelmekte
+msla..; select yapıları = find... şeklinde
+
+findUserByName() şeklinde bir fonk oluşturursanız da jpa bunu sizin için doldurcaktır 
+ve isme gore arama yapabilceksiniz artık
+*/
 
 @Repository
 public interface UserRepostiory extends JpaRepository<User,Long> { }
@@ -80,7 +89,7 @@ public interface UserRepostiory extends JpaRepository<User,Long> { }
 <br>
 
 
-- Service Katmanlarını Hazırlayalım / Buradaki onemli noktalardan birisi şifreleri , kişisel bilgileri vs. API yardımıyla göstermemek ve gerekirse istekler ve cevaplar için ayrı ayrı entityler oluşturmak isteğinize göre cevaplarınızı dönebilir isteğinize göre isteklerinizi belirleyebilirsiniz.
+- Service Katmanlarını Hazırlayalım / Buradaki onemli noktalardan birisi de şifreleri , kişisel bilgileri vs. Göstermemek ve gerekirse ,istek ve cevaplar için ayrı ayrı entityler oluşturmak ,isteğinize göre cevaplarınızı dönebilir, isteğinize göre isteklerinizi belirleyebilirsiniz.
 ```java
 package com.furkancosgun.users.Service;
 
@@ -99,15 +108,16 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 
-@Service
+@Service//Her classın aşagı yukarı farklı gorevi oldugu için bu tur anatosyanları unutmanız durumunda hatalar alabilirsiniz
 public class UserService {
 
-@Autowired
+@Autowired //Constructor kullanmaya gerek kalmadan deger ataması saglar
 private UserRepostiory userRepostiory;
 
 
+//Butun kullanıcıları getircek olan fonk
 public List<UserResponse> getAllUsers(){
-
+//user classımızda passwrod vs. bilgiler oldugu için bu şekilde mapleme işlemi yaparak tip değişimi sagladık ve return ettik
 return userRepostiory.findAll()
 .stream()
 .map(user -> userToUserResponse(user))
@@ -115,16 +125,24 @@ return userRepostiory.findAll()
 }
 
   
-
+//secilen id li kullancıyı return etcek
+//bulamadıgı durumlarda oluşturdugumz exception classına takılıp hatayı return edecektir
 public ResponseEntity<UserResponse> getUserById(long id) throws NotFoundException {
 return ResponseEntity.ok(userToUserResponse(userRepostiory.findById(id).orElseThrow(()-> new NotFoundException(404,"User Not Found"))));
 }
 
+//Kullanıcı kayıt
 public UserResponse saveUser(User user){
 return userToUserResponse(userRepostiory.save(user));
 }
   
-
+/*
+Kullanıcı guncelleme
+once o kullanıcı varmı bakarız varsa,
+onceki degerlerinin üzerine yeni degerlerini de verip 
+tekrar save işlemi yaptgımızıda bu bize update olarak yanısyacaktır
+yoksa exceptiondan hata doneriz
+*/
 public ResponseEntity<UserResponse> updateUser(long id, User user) throws NotFoundException {
 User newUser = userRepostiory.findById(id).orElseThrow(()-> new NotFoundException(404,"User Not Found"));
 newUser.setFullName(user.getFullName());
@@ -134,7 +152,11 @@ newUser.setPassword(user.getPassword());
 return ResponseEntity.ok(userToUserResponse(userRepostiory.save(newUser)));
 }
 
-
+/*
+Kullanıcı silme
+Kullanıcı varsa sistemde başarı durumunu true doner,
+kullanıcı yoksa başarı durumunu false doneriz
+*/
 public Map<String, Boolean> deleteUserById(long id){
 Map<String,Boolean> map = new HashMap<>();
 Optional<User> user = userRepostiory.findById(id);
@@ -148,12 +170,12 @@ map.put("success",Boolean.FALSE);
 return map;
 }
 
-
+//Mapleme işlemini hızlandırmak için yapılmış bir method
 private UserResponse userToUserResponse(User user){
 return new UserResponse(user.getId(),user.getFullName(),user.getEmail());
 }}
 ```
- - Kendimize ait bir de exception sınıfı oluşturalım , hata mesajlarımızı ve hata kodlarımızı istegimize göre donelim    
+ - Kendimize ait bir de exception sınıfı oluşturalım , hata mesajlarımızı ve hata kodlarımızı istegimize göre donelim	
 ```java
 package com.furkancosgun.users.Exception;  
   
@@ -170,7 +192,7 @@ public class NotFoundException extends Exception {
 }
 ```
  - Son Olarakta Controller Katmanımzıı Yazalım
-    
+	
 ```java
 package com.furkancosgun.users.Controller;
 
@@ -183,13 +205,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
   
-@RestController
-@CrossOrigin("http://localhost:8080")
-@RequestMapping("/api")
+@RestController 
+@CrossOrigin("http://localhost:8080")//Ana Url
+@RequestMapping("/api")//Ana Yol
 public class UserController {
 
 @Autowired
 UserService userService;
+
 
 @GetMapping("/users")
 public List<UserResponse> getAllUsers(){
