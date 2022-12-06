@@ -306,6 +306,4 @@ DELETE: localhost:8080/api/users/1
 "success": true
 }
 ```
-```JAVA
-System.out.println("KATKILARA HERZAMAN AÇIĞIM");
-```
+
